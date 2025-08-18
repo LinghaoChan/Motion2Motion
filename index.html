@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Motion2Motion: Cross-topology Motion Transfer with Sparse Correspondence</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="responsive.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 2rem;
+        }
+
+        .conference-info {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 500;
+            margin-bottom: 2rem;
+        }
+
+        .authors {
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+        }
+
+        .author {
+            display: inline-block;
+            margin: 0 8px 8px 8px;
+            color: #555;
+            font-weight: 500;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .author:hover {
+            color: #667eea;
+            text-decoration: underline;
+        }
+
+        .author sup {
+            color: #667eea;
+            font-weight: 600;
+            margin-left: 2px;
+        }
+
+        .affiliations {
+            color: #777;
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .affiliation-item {
+            display: inline;
+            margin-right: 0.5rem;
+        }
+
+        .affiliation-item:not(:last-child):after {
+            content: " • ";
+            color: #999;
+            margin-left: 0.5rem;
+        }
+
+        .affiliation-item sup {
+            color: #667eea;
+            font-weight: 600;
+            margin-right: 4px;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        main {
+            background: white;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .section {
+            padding: 3rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        .section h2 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #333;
+            text-align: center;
+        }
+
+        .teaser-video {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            margin-bottom: 1rem;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+        }
+
+        .demo-section .video-container {
+            position: relative;
+            width: 100%;
+            margin: 1.5rem 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .demo-section video {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 12px;
+        }
+
+        .video-placeholder {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            padding: 4rem 2rem;
+            margin-bottom: 1rem;
+            border: 2px dashed #dee2e6;
+            transition: all 0.3s ease;
+        }
+
+        .video-placeholder:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .video-placeholder:hover i {
+            color: white;
+        }
+
+        .video-placeholder i {
+            font-size: 4rem;
+            color: #6c757d;
+            margin-bottom: 1rem;
+        }
+
+        .abstract {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            text-align: justify;
+            color: #444;
+        }
+
+        .highlights {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .highlight-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 2rem;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+        }
+
+        .highlight-card h3 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .result-item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .result-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .result-placeholder {
+            background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+            height: 200px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .result-placeholder i {
+            font-size: 3rem;
+            color: #6c757d;
+        }
+
+        .bibtex {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            border: 1px solid #e9ecef;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            text-align: left;
+        }
+
+        .bibtex:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+        }
+
+        .demo-section {
+            margin-bottom: 3rem;
+        }
+
+        .demo-section h3 {
+            color: #667eea;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .demo-section p {
+            margin-bottom: 1.5rem;
+            color: #666;
+        }
+
+        .method-overview-image {
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .method-flow {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin: 2rem 0;
+            padding: 2rem;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+        }
+
+        .flow-step {
+            flex: 1;
+            min-width: 200px;
+            text-align: center;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .step-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .flow-step h4 {
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .flow-step p {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .flow-arrow {
+            font-size: 2rem;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .application-showcase {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .app-item {
+            width: 100%;
+            max-width: 600px;
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #667eea;
+        }
+
+        .app-content h4 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .app-content p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .app-arrow {
+            font-size: 2rem;
+            color: #667eea;
+            font-weight: bold;
+            margin: 0.5rem 0;
+        }
+
+        .addon-features {
+            margin: 2rem 0;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .feature-item {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .feature-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-item i {
+            font-size: 2.5rem;
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+
+        .feature-item h4 {
+            color: #333;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .feature-item p {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .addon-demo {
+            margin-top: 2rem;
+        }
+
+        .acknowledgments {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 2rem;
+            border-radius: 12px;
+            margin-top: 2rem;
+            text-align: center;
+            color: #666;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem 0;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .section {
+                padding: 2rem 1.5rem;
+            }
+            
+            .buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .video-container {
+                margin: 0 -1.5rem 1rem -1.5rem; /* Extend to edge on mobile */
+                border-radius: 0;
+            }
+
+            .video-container iframe {
+                border-radius: 0;
+            }
+
+            .demo-section .video-container {
+                margin: 1rem -1.5rem;
+                border-radius: 0;
+            }
+
+            .demo-section video {
+                border-radius: 0;
+            }
+
+            .method-flow {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .flow-arrow {
+                transform: rotate(90deg);
+                margin: 1rem 0;
+            }
+
+            .flow-step {
+                min-width: unset;
+                width: 100%;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .application-showcase {
+                padding: 0 1rem;
+            }
+
+            .app-item {
+                padding: 1.5rem;
+            }
+
+            .demo-section h3 {
+                font-size: 1.3rem;
+            }
+
+            .bibtex {
+                font-size: 0.75rem;
+                padding: 1rem;
+                margin: 0 -1.5rem;
+                border-radius: 0;
+                line-height: 1.3;
+            }
+
+            .authors {
+                line-height: 1.6;
+            }
+
+            .author {
+                margin: 0 4px 6px 4px;
+                font-size: 0.9rem;
+            }
+
+            .affiliations {
+                font-size: 0.8rem;
+                padding: 0 1rem;
+                line-height: 1.8;
+            }
+
+            .affiliation-item {
+                margin-right: 0.3rem;
+            }
+
+            .affiliation-item:not(:last-child):after {
+                margin-left: 0.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <h1>Motion2Motion</h1>
+                <p class="subtitle">Cross-topology Motion Transfer with Sparse Correspondence</p>
+                
+                <div class="conference-info">
+                    <i class="fas fa-award"></i> SIGGRAPH Asia 2025
+                </div>
+                
+                <div class="authors">
+                    <a href="https://lhchen.top/" class="author">Ling-Hao Chen*<sup>1,2</sup></a>
+                    <span class="author">Yuhong Zhang<sup>1</sup></span>
+                    <a href="https://zxyin.github.io/" class="author">Zixin Yin<sup>3</sup></a>
+                    <a href="https://frank-zy-dou.github.io/" class="author">Zhiyang Dou<sup>4</sup></a>
+                    <a href="https://chenxin.tech/" class="author">Xin Chen<sup>5</sup></a>
+                    <a href="https://wangjingbo1219.github.io/" class="author">Jingbo Wang<sup>6</sup></a>
+                    <a href="https://cs.hku.hk/index.php/people/academic-staff/taku" class="author">Taku Komura<sup>4</sup></a>
+                    <a href="https://www.leizhang.org/" class="author">Lei Zhang<sup>2</sup></a>
+                </div>
+                
+                <div class="affiliations">
+                    <div class="affiliation-item"><sup>1</sup>Tsinghua University</div>
+                    <div class="affiliation-item"><sup>2</sup>IDEA Research</div>
+                    <div class="affiliation-item"><sup>3</sup>HKUST</div>
+                    <div class="affiliation-item"><sup>4</sup>HKU</div>
+                    <div class="affiliation-item"><sup>5</sup>ByteDance</div>
+                    <div class="affiliation-item"><sup>6</sup>Shanghai AI Lab</div>
+                </div>
+                
+                <div class="buttons">
+                    <a href="#" class="btn btn-primary">
+                        <i class="fas fa-file-pdf"></i> Paper
+                    </a>
+                    <a href="https://github.com/LinghaoChan/Motion2Motion_codes" class="btn btn-secondary">
+                        <i class="fas fa-code"></i> Code
+                    </a>
+                    <a href="https://youtu.be/EMdKwyHKSTc" class="btn btn-secondary" target="_blank">
+                        <i class="fab fa-youtube"></i> Video
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <main>
+            <section class="section">
+                <div class="teaser-video">
+                    <div class="video-container">
+                        <iframe 
+                            src="https://www.youtube.com/embed/EMdKwyHKSTc" 
+                            title="Motion2Motion Demo Video"
+                            frameborder="0" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                            allowfullscreen>
+                        </iframe>
+                    </div>
+                    <p><em>Video demo of our cross-topology motion retargeting capabilities</em></p>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2><i class="fas fa-lightbulb"></i> Abstract</h2>
+                <div class="abstract">
+                    This work studies the challenge of transferring animations between characters whose skeletal topologies differ substantially. While many techniques have advanced retargeting techniques in decades, transferring motions across diverse topologies remains less-explored. The primary obstacle lies in the inherent topological inconsistency between source and target skeletons, which restricts the establishment of straightforward one-to-one bone correspondences. Besides, the current lack of large-scale paired motion datasets spanning different topological structures severely constrains the development of data-driven approaches.
+                    <br><br>
+                    To address these limitations, we introduce <strong>Motion2Motion</strong>, a novel, training-free framework. Simply yet effectively, Motion2Motion works with only one or a few example motions on the target skeleton, by accessing a sparse set of bone correspondences between the source and target skeletons. Through comprehensive qualitative and quantitative evaluations, we demonstrate that Motion2Motion achieves efficient and reliable performance in both similar-skeleton and cross-species skeleton transfer scenarios.
+                </div>
+
+            </section>
+
+            <section class="section">
+                <h2><i class="fas fa-images"></i> Key Features & Results</h2>
+                
+                <div class="demo-section">
+                    <h3><i class="fas fa-dragon"></i> Cross-Topology Motion Retargeting</h3>
+                    <p>We demonstrate both in-species and cross-species motion retargeting examples:</p>
+                    <div class="video-container">
+                        <video controls style="width: 100%; border-radius: 12px;">
+                            <source src="./videos/cross-topo-retarget.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                    <p><em>Anaconda attack motion → King Cobra (in-species) → T-Rex (cross-species)</em></p>
+                </div>
+
+                <div class="demo-section">
+                    <h3><i class="fas fa-paw"></i> Biped to Quadruped Animation Retargeting</h3>
+                    <p>High-quality motion transfer between different locomotion types:</p>
+                    <div class="video-container">
+                        <video controls style="width: 100%; border-radius: 12px;">
+                            <source src="./videos/biped2quad.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                    <p><em>Flamingo walking motion → Monkey: Coherent hind legs, natural tail & arm motion</em></p>
+                </div>
+
+                <div class="demo-section">
+                    <h3><i class="fas fa-link"></i> Matching with Sparse Correspondence</h3>
+                    <p>Our system works with minimal bone binding - as few as 6 bound bones:</p>
+                    <div class="video-container">
+                        <video controls style="width: 100%; border-radius: 12px;">
+                            <source src="./videos/matching-with-sparse-correspondence_.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                    <p><em>Dog animation from bear motion with only 6 bound bones (visualized in purple)</em></p>
+                </div>
+
+                <div class="demo-section">
+                    <h3><i class="fas fa-wave-square"></i> Motion Phase Visualization</h3>
+                    <p>Phase coherence analysis across different species:</p>
+                    <div class="video-container">
+                        <video controls style="width: 100%; border-radius: 12px;">
+                            <source src="./videos/phase-vis.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                    <p><em>T-Rex → Human & Fox: Hind leg binding maintains phase coherence across different species</em></p>
+                </div>
+
+                <div class="demo-section">
+                    <h3><i class="fas fa-key"></i> Sparse Source Key Frames</h3>
+                    <p>Retargeting with temporally sparse source motion:</p>
+                    <div class="video-container">
+                        <video controls style="width: 100%; border-radius: 12px;">
+                            <source src="./videos/key-frame.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                    <p><em>Purple frames: Provided key frames | Blue frames: Ground truth<br>
+                    Successfully retarget dragon motion from sparse bat motion key frames</em></p>
+                </div>
+
+                <div class="demo-section">
+                    <h3><i class="fas fa-chart-bar"></i> Comparison with Baselines</h3>
+                    <p>Our method significantly outperforms existing approaches:</p>
+                    <div class="video-container">
+                        <video controls style="width: 100%; border-radius: 12px;">
+                            <source src="./videos/compare-with-baseline.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                    <p><em>Dragon → Bat retargeting: Our result shows stable alignment with source motion</em></p>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2><i class="fas fa-cog"></i> System Overview</h2>
+                <p style="text-align: center; margin-bottom: 2rem;">Motion2Motion works in a motion-matching fashion with sparse bone correspondence:</p>
+                
+                <div class="method-overview-image">
+                    <img src="./img/sys.jpg" alt="Motion2Motion System Overview" style="width: 100%; max-width: 1500px; height: auto; border-radius: 12px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);">
+                    <p style="margin-top: 1rem; color: #666;">System overview of Motion2Motion.
+                        (A) The source motion sequence. 
+                        (B) The source sequence is divided into overlapping motion patches . 
+                        (C) Each source patch is projected to the target skeleton space via sparse mapping and noise initialization, serving as the query for retrieval. For each source patch, we retrieve target patches (D) from a pre-built motion patch database, based on sparse correspondences. 
+                        (E) The matched target patches are averaged for blending. 
+                        (F) The  retargeted motion is reconstructed from the blended target patches. (C)-(F) are executed in L times.
+                    </p>
+                </div>
+                
+
+
+            <section class="section">
+                <h2><i class="fas fa-gamepad"></i> Applications</h2>
+                
+                <div class="demo-section">
+                    <h3><i class="fas fa-running"></i> SMPL-Based Motion to Any Character</h3>
+                    <p>Bridging the gap between simple motion capture and complex game characters:</p>
+                    
+                    <div class="video-container">
+                        <video controls style="width: 100%; border-radius: 12px;">
+                            <source src="./videos/smpl2any.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                    <p><em>SMPL motion → Complex game characters with dynamic elements like clothing and hair</em></p>
+                    
+
+
+                <div class="demo-section">
+                    <h3><i class="fas fa-cube"></i> Blender Add-on</h3>
+                    <p>Professional workflow integration for real-time motion retargeting:</p>
+                    
+                    <div class="video-container">
+                        <video controls style="width: 100%; border-radius: 12px;">
+                            <source src="./videos/blender-add-on.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                    <p><em>See our Blender add-on in action: real-time motion retargeting with intuitive interface</em></p>
+
+                    
+                </div>
+            </section>
+
+            <section class="section">
+                <h2><i class="fas fa-quote-left"></i> Citation</h2>
+                <p style="text-align: center; margin-bottom: 1.5rem; color: #666;">
+                    If you find our work useful, please consider citing:
+                </p>
+                <div class="bibtex">
+@article{chen2025motion2motion,
+  title     = {Motion2Motion: Cross-topology Motion Transfer with Sparse Correspondence},
+  author    = {Chen, Ling-Hao and Zhang, Yuhong and Yin, Zixin and Dou, Zhiyang and
+               Chen, Xin and Wang, Jingbo and Komura, Taku and Zhang, Lei},
+  journal   = {ACM Transactions on Graphics (TOG)},
+  volume    = {44},
+  number    = {1},
+  year      = {2025},
+  publisher = {ACM},
+  doi       = {10.1145/xxxxxxx}
+}
+                </div>
+                <p style="text-align: center; margin-top: 1rem; font-size: 0.9rem; color: #888;">
+                    <i class="fas fa-info-circle"></i> Click the citation box above to copy to clipboard
+                </p>
+            </section>
+
+            <section class="section">
+                <div class="acknowledgments">
+                    <h3>Acknowledgments</h3>
+                    <p>Work done during Ling-Hao Chen's internship at IDEA Research. The author team would like to acknowledge all program committee members for their extensive efforts and constructive suggestions. In addition, Weiyu Li (HKUST), Shunlin Lu (CUHK-SZ), and Bohong Chen (ZJU) had discussed with the author team many times throughout the process. The author team would like to convey sincere appreciation to them as well. </p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Motion2Motion Project. All rights reserved.</p>
+            <p style="margin-top: 0.5rem; font-size: 0.9rem;">Thanks for watching our demonstration!</p>
+        </div>
+    </footer>
+
+    <script>
+        // Add smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Add copy to clipboard for BibTeX
+        const bibtex = document.querySelector('.bibtex');
+        bibtex.addEventListener('click', function() {
+            navigator.clipboard.writeText(this.textContent);
+            
+            const originalText = this.textContent;
+            this.style.background = '#d4edda';
+            setTimeout(() => {
+                this.style.background = '#f8f9fa';
+            }, 1000);
+        });
+
+        // Add hover effects for result items
+        document.querySelectorAll('.result-item').forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                this.style.background = '#e9ecef';
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                this.style.background = '#f8f9fa';
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+/* 响应式设计增强 */
+@media (max-width: 1200px) {
+    .container {
+        max-width: 100%;
+        padding: 0 30px;
+    }
+}
+
+@media (max-width: 768px) {
+    .header-content {
+        padding: 0 10px;
+    }
+    
+    h1 {
+        font-size: 1.8rem;
+        line-height: 1.2;
+    }
+    
+    .subtitle {
+        font-size: 1rem;
+    }
+    
+    .authors {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .author {
+        margin: 0;
+    }
+    
+    .affiliations {
+        font-size: 0.8rem;
+        line-height: 1.4;
+    }
+    
+    .highlights {
+        grid-template-columns: 1fr;
+    }
+    
+    .results-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .section {
+        padding: 1.5rem;
+    }
+    
+    .section h2 {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 0 15px;
+    }
+    
+    .buttons {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .bibtex {
+        font-size: 0.7rem;
+        padding: 1rem;
+    }
+}
+
+/* 打印样式 */
+@media print {
+    body {
+        background: white;
+    }
+    
+    header {
+        background: white;
+        box-shadow: none;
+    }
+    
+    .btn {
+        display: none;
+    }
+    
+    .video-placeholder {
+        display: none;
+    }
+}
+
+/* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+    body {
+        background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+    }
+    
+    header {
+        background: rgba(26, 32, 44, 0.95);
+    }
+    
+    main {
+        background: #1a202c;
+        color: #e2e8f0;
+    }
+    
+    .section {
+        border-bottom-color: #2d3748;
+    }
+    
+    .abstract {
+        color: #cbd5e0;
+    }
+    
+    .highlight-card {
+        background: #2d3748;
+        color: #e2e8f0;
+    }
+    
+    .result-item {
+        background: #2d3748;
+        color: #e2e8f0;
+    }
+    
+    .bibtex {
+        background: #2d3748;
+        border-color: #4a5568;
+        color: #e2e8f0;
+    }
+}
